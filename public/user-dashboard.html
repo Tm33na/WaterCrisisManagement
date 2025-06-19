@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <!-- Tailwind CSS CDN for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        xintegrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General Body and Container */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Consistent font */
+            background-color: #f8f9fa;
+            /* Light background, matching admin pages */
+            color: #343a40;
+            /* Darker text for readability */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            /* Stack header and content */
+            min-height: 100vh;
+        }
+
+        /* Header Section (consistent with admin pages) */
+        .header {
+            background-color: #2c3e50;
+            /* Darker, professional header */
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            /* More prominent shadow */
+        }
+
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            padding-left: 10px;
+            letter-spacing: 0.5px;
+            /* Slight letter spacing */
+        }
+
+        .header #usernameDisplay {
+            font-size: 0.7em;
+            /* Smaller for the username part */
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        /* Logout Button (consistent with admin pages) */
+        .logout-btn {
+            background-color: #e74c3c;
+            /* Flat red */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-right: 30px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            /* Slight lift effect */
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: #34495e;
+            /* Slightly lighter dark for sidebar */
+            color: white;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            /* Hidden by default */
+            height: 100%;
+            padding-top: 80px;
+            /* Space for fixed nav */
+            transition: all 0.3s ease;
+            z-index: 999;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar div {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            /* Subtle border */
+            display: flex;
+            /* For icon alignment */
+            align-items: center;
+        }
+
+        .sidebar div:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar a.btn-action {
+            display: block;
+            color: white;
+            text-decoration: none;
+            font-size: 1.05em;
+            /* Slightly smaller */
+            transition: color 0.3s ease, background-color 0.3s ease;
+            width: 100%;
+            padding: 5px 0;
+            /* Adjust padding for text */
+        }
+
+        .sidebar a.btn-action:hover {
+            color: #85c1e9;
+            /* Light blue on hover */
+            background-color: rgba(255, 255, 255, 0.05);
+            /* Very subtle background */
+        }
+
+        .sidebar-icon {
+            margin-right: 15px;
+            /* Space between icon and text */
+            font-size: 1.2em;
+            color: #aeb6bf;
+            /* Lighter icon color */
+        }
+
+        /* Checkbox for sidebar toggle */
+        #check {
+            display: none;
+        }
+
+        #check:checked~.sidebar {
+            left: 0;
+        }
+
+        #check:checked~.main {
+            margin-left: 250px;
+        }
+
+        /* Main Content Area */
+        .main {
+            flex-grow: 1;
+            padding: 90px 40px 40px 40px;
+            /* More padding for a spacious look */
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Dashboard Content Container */
+        .dashboard-container {
+            margin-top: 40px;
+            /* Adjust margin to clear fixed header */
+            max-width: 1000px;
+            width: 100%;
+            /* Responsive width */
+            margin-left: auto;
+            /* Center the container */
+            margin-right: auto;
+            /* Center the container */
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            /* More rounded corners */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            /* Nicer shadow */
+            flex-grow: 1;
+            /* Allow container to grow */
+            padding-bottom: 50px;
+            /* Extra padding at the bottom */
+        }
+
+        /* Loading and Error Messages (consistent with admin pages) */
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+            font-size: 1em;
+        }
+
+        .loading {
+            background-color: #e0f2f7;
+            color: #2196f3;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #e74c3c;
+        }
+
+        .no-data-message {
+            background-color: #fceceb;
+            border: 1px solid #e74c3c;
+            color: #c0392b;
+        }
+
+        /* Card for overall water usage overview */
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .date-navigator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .month-year-display {
+            font-weight: bold;
+            font-size: 1.1em;
+            min-width: 150px;
+            /* To prevent jumping */
+            text-align: center;
+        }
+
+        .btn.btn-secondary {
+            background-color: #6c757d;
+            /* A neutral gray */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn.btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        #totalMonthlyUsage {
+            font-size: 1.2em;
+            color: #007bff;
+            font-weight: bold;
+            /* Ensure it stands out */
+        }
+
+        /* Ensure Chart.js canvas resizes within its container */
+        #waterUsageChart {
+            width: 100% !important;
+            height: 350px !important;
+            /* Fixed height for consistency */
+        }
+
+        /* --- NEW / MODIFIED STYLES FOR HIERARCHY --- */
+
+        .section-title-bar {
+            margin-top: 40px;
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 2px solid #e0e6ea;
+            padding-bottom: 15px;
+        }
+
+        .section-title-bar h2 {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin: 0;
+            position: relative;
+            display: inline-block;
+            padding: 0 15px;
+            background-color: #fff;
+            /* To make the background white under the title */
+            top: 10px;
+            /* Adjust to sit on the line */
+        }
+
+        /* Homes Grid for overall layout */
+        .homes-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            /* Stack homes vertically */
+            gap: 25px;
+            /* Spacing between home cards */
+        }
+
+        /* Home Card */
+        .home-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e6ea;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .home-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .home-summary h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.6em;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ecf0f1;
+            display: flex;
+            align-items: center;
+        }
+
+        .home-summary h3 i {
+            margin-right: 12px;
+            color: #3498db;
+            font-size: 1.2em;
+        }
+
+        .home-insights {
+            display: flex;
+            flex-wrap: wrap;
+            /* Allow wrapping on smaller screens */
+            gap: 20px;
+            /* Spacing between insight blocks */
+            margin-bottom: 20px;
+        }
+
+        .home-insights p,
+        .home-insights h4 {
+            margin: 0;
+            padding: 0;
+        }
+
+        .tank-levels-group,
+        .rain-status-group {
+            flex: 1;
+            /* Allow these sections to grow */
+            min-width: 250px;
+            /* Ensure they don't get too small */
+        }
+
+        .tank-levels-group h4,
+        .rain-status-group h4 {
+            color: #555;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .tank-info {
+            display: block;
+            /* Make each tank info a block for better readability */
+            align-items: center;
+            background-color: #e8f5fb;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #007bff;
+            margin-bottom: 8px;
+            /* Space between tank infos */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .tank-info i {
+            margin-right: 8px;
+            color: #3498db;
+        }
+
+        .tank-info strong {
+            color: #0056b3;
+            /* Darker blue for value */
+        }
+
+        .rain-status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.95em;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .rain-status-indicator i {
+            margin-right: 8px;
+        }
+
+        .rain-status-indicator.raining {
+            background-color: #d4edda;
+            /* Light green */
+            color: #155724;
+            /* Dark green */
+        }
+
+        .rain-status-indicator.not-raining {
+            background-color: #fefefe;
+            /* Light gray/white */
+            color: #6c757d;
+            /* Gray */
+            border: 1px solid #e0e6ea;
+        }
+
+        .rain-status-indicator.unknown {
+            background-color: #fdfae7;
+            /* Light yellow */
+            color: #856404;
+            /* Dark yellow */
+        }
+
+
+        /* Per-Home Water Usage Chart */
+        .home-water-usage {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed #e0e6ea;
+            margin-bottom: 20px;
+        }
+
+        .home-water-usage h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .home-usage-chart {
+            width: 100% !important;
+            height: 250px !important;
+            /* Slightly smaller than overall chart */
+        }
+
+        .btn.btn-primary {
+            background-color: #007bff;
+            /* Blue for primary actions */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 15px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn.btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .home-details {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed #e0e6ea;
+            display: none;
+            /* Hidden by default */
+        }
+
+        /* Controller Card within Home Details */
+        .controller-card {
+            background-color: #f9fbfd;
+            border: 1px solid #dcdfe4;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .controller-summary h4 {
+            color: #34495e;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+            padding-bottom: 8px;
+            border-bottom: 1px dotted #e6e9ed;
+            display: flex;
+            align-items: center;
+        }
+
+        .controller-summary h4 i {
+            margin-right: 10px;
+            color: #f39c12;
+            font-size: 1.1em;
+        }
+
+        .controller-status {
+            font-size: 0.8em;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-left: 10px;
+            /* Space between name and status */
+        }
+
+        /* Controller status indicators */
+        .status-online .controller-status {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-offline .controller-status {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-alert .controller-status {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+
+        .btn.btn-tertiary {
+            background-color: #6c757d;
+            /* Muted gray for secondary actions */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn.btn-tertiary:hover {
+            background-color: #5a6268;
+        }
+
+        .sensor-details {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed #e6e9ed;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .sensor-data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            padding-top: 5px;
+        }
+
+        .sensor-data {
+            background-color: #ffffff;
+            border: 1px solid #e9eff3;
+            border-left: 4px solid;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Sensor border colors based on type */
+        .sensor-data.level {
+            border-color: #3498db;
+        }
+
+        .sensor-data.flow {
+            border-color: #2ecc71;
+        }
+
+        .sensor-data.temp {
+            border-color: #e74c3c;
+        }
+
+        .sensor-data.rain {
+            border-color: #9b59b6;
+        }
+
+        .sensor-data.humidity {
+            border-color: #34495e;
+        }
+
+
+        .sensor-data strong {
+            display: flex;
+            align-items: center;
+            color: #2c3e50;
+            font-size: 1.05em;
+            margin-bottom: 8px;
+        }
+
+        .sensor-data strong i {
+            margin-right: 8px;
+            font-size: 1.1em;
+            color: #7f8c8d;
+        }
+
+        .sensor-data p {
+            margin: 4px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .sensor-data p.timestamp-small {
+            font-size: 0.8em;
+            color: #999;
+        }
+
+        .sensor-data .sensor-type-label {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: -5px;
+            margin-bottom: 10px;
+            text-transform: capitalize;
+        }
+
+        /* Styles for Alerts and Recommendations */
+        .alerts-recommendations-section {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .alerts-recommendations-section h3 {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e6ea;
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alerts-recommendations-section h3 i {
+            font-size: 1.5em;
+            color: #3498db;
+        }
+
+        .alert-item,
+        .recommendation-item {
+            background-color: #f9fbfd;
+            border-radius: 10px;
+            padding: 18px 20px;
+            margin-bottom: 15px;
+            border: 1px solid #dcdfe4;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .alert-item:hover,
+        .recommendation-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .alert-item.critical {
+            background-color: #f8d7da;
+            /* Light red */
+            border-color: #e74c3c;
+            /* Red */
+            color: #721c24;
+        }
+
+        .alert-item.critical i {
+            color: #c0392b;
+            /* Darker red */
+        }
+
+        .alert-item.warning {
+            background-color: #fff3cd;
+            /* Light yellow */
+            border-color: #f39c12;
+            /* Orange */
+            color: #856404;
+        }
+
+        .alert-item.warning i {
+            color: #e67e22;
+            /* Darker orange */
+        }
+
+        .alert-item.info {
+            background-color: #dbeafe;
+            /* Light blue */
+            border-color: #3498db;
+            /* Blue */
+            color: #2196f3;
+        }
+
+        .alert-item.info i {
+            color: #2980b9;
+            /* Darker blue */
+        }
+
+        .recommendation-item {
+            background-color: #d4edda;
+            /* Light green */
+            border-color: #2ecc71;
+            /* Green */
+            color: #155724;
+        }
+
+        .recommendation-item i {
+            color: #27ae60;
+            /* Darker green */
+        }
+
+        .alert-item i,
+        .recommendation-item i {
+            font-size: 1.8em;
+            align-self: center;
+            min-width: 30px;
+            /* Ensure icon doesn't shrink too much */
+            text-align: center;
+        }
+
+        .alert-content,
+        .recommendation-content {
+            flex-grow: 1;
+        }
+
+        .alert-content h4,
+        .recommendation-content h4 {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+            /* Consistent heading color */
+        }
+
+        .alert-content p,
+        .recommendation-content p {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .alert-content p.timestamp-small,
+        .recommendation-content p.timestamp-small {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .user-info {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .user-info h2 {
+            color: #343a40;
+            /* Darker color for section sub-headings */
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .user-info p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: baseline;
+            /* Align key and value */
+        }
+
+        .user-info p strong {
+            color: #007bff;
+            /* Highlight labels */
+            min-width: 100px;
+            /* Give labels a consistent width */
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+
+        .home-list {
+            margin-top: 20px;
+        }
+
+        .home-list h2 {
+            color: #343a40;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .home-item {
+            background-color: #f8f9fa;
+            /* Lighter background for individual items */
+            border: 1px solid #dee2e6;
+            border-left: 5px solid #28a745;
+            /* Green highlight for homes */
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .home-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .home-item h3 {
+            margin-top: 0;
+            color: #0056b3;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .home-item h3::before {
+            content: '\f015';
+            /* FontAwesome home icon */
+            font-family: 'Font Awesome 6 Free';
+            /* Make sure FontAwesome is linked */
+            font-weight: 900;
+            /* For solid icons */
+            margin-right: 8px;
+            color: #505359;
+            /* Icon color for home items */
+        }
+
+
+        .home-item p {
+            margin-bottom: 8px;
+            font-size: 1em;
+            display: flex;
+            align-items: baseline;
+        }
+
+        .home-item p strong {
+            color: #007bff;
+            min-width: 90px;
+            /* Adjust label width for home items */
+            display: inline-block;
+            margin-right: 10px;
+
+
+        }
+
+
+      #dynamicChangePasswordForm h2 {
+            /* Targeting the h2 if you decide to add one inside the form HTML */
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 1.8em;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        #dynamicChangePasswordForm .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+            /* Consistent spacing */
+        }
+
+        #dynamicChangePasswordForm .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        #dynamicChangePasswordForm .form-group input[type="password"] {
+            width: calc(100% - 24px);
+            /* Full width with padding/border consideration */
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #dynamicChangePasswordForm .form-group input[type="password"]:focus {
+            border-color: #3498db;
+            /* Blue highlight on focus */
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+
+        #dynamicChangePasswordForm .btn-submit {
+            background-color: #1abc9c;
+            /* Green color for action */
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 25px;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #dynamicChangePasswordForm .btn-submit:hover {
+            background-color: #16a085;
+            /* Darker green on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        #dynamicChangePasswordForm .btn-submit i {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        /* Specific message div for the change password form */
+        #changePasswordMessage {
+            display: none;
+            /* Hide by default, JS will show */
+        }
+
+
+
+        /* Responsive adjustments */
+        @media (max-width: 645px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.6em;
+                margin-bottom: 25px;
+            }
+
+            .header h1 span {
+                display: none;
+            }
+
+            .logout-btn {
+                display: none;
+                width: 20%;
+                text-align: center;
+                margin-top: 5px;
+            }
+
+            .main {
+                padding: 4px;
+            }
+
+            .dashboard-container {
+                padding: 10px;
+                margin-top: 60px;
+                width: 100%;
+
+            }
+
+            .home-card,
+            .controller-card {
+                padding: 15px;
+            }
+
+            .home-summary h3 {
+                font-size: 1.4em;
+            }
+
+            .controller-summary h4 {
+                font-size: 1.1em;
+            }
+
+            .home-insights {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .sensor-data-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .date-navigator {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .month-year-display {
+                flex-grow: 1;
+            }
+
+            .btn.btn-secondary {
+                background-color: #6c757d;
+                /* A neutral gray */
+                color: white;
+                border: none;
+                padding: 2px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .alerts-recommendations-section h3 {
+                margin-top: 50px;
+            }
+
+
+
+
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <input type="checkbox" id="check" />
+
+    <div class="header">
+        <div class="btn1">
+            <label for="check"><i style="font-size:x-large;" class="fa-solid fa-bars"></i></label>
+            <h1 style="display: inline-block;">User Dashboard <span id="usernameDisplay"></span></h1>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div class="sidebar">
+        <div><a href="#" class="btn-action" onclick="showSection('dashboardContentContainer')"><i
+                    class="fa-solid fa-house sidebar-icon"></i> Dashboard</a></div>
+        <div><a href="#" class="btn-action" onclick="showSection('alertsSection')"><i
+                    class="fa-solid fa-bell sidebar-icon"></i> Alerts </a></div>
+        <div><a href="#" class="btn-action" onclick="showSection('recommendationsSection')"><i
+                    class="fa-solid fa-lightbulb sidebar-icon"></i> Recommendations </a></div>
+        <div><a href="#" class="btn-action" onclick="showSection('profileSection')"><i
+                    class="fa-solid fa-user-gear sidebar-icon"></i> Profile</a> </div>
+        <div><a href="#" class="btn-action" onclick="showSection('changePasswordSection')"><i
+                    class="fa-solid fa-key sidebar-icon"></i> Change Password</a> </div>
+        <div><a class="btn-action" href="#" onclick="logout()"><i
+                    class="fa-solid fa-right-from-bracket sidebar-icon"></i> Logout</a></div>
+    </div>
+
+    <div class="main">
+        <div id="dashboardContentContainer">
+            <div class="dashboard-container">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Overall Water Usage Overview</h3>
+                        <div class="date-navigator">
+                            <button id="prevMonthBtn" class="btn btn-secondary"><i class="fa-solid fa-chevron-left"></i>
+                                Previous Month</button>
+                            <span id="currentMonthYear" class="month-year-display"></span>
+                            <button id="nextMonthBtn" class="btn btn-secondary">Next Month <i
+                                    class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p>Total Water Used Across All Homes this Month: <strong id="totalMonthlyUsage">--</strong></p>
+                        <canvas id="waterUsageChart"></canvas>
+                    </div>
+                </div>
+
+                <div id="loading" class="message loading">Loading data...</div>
+                <div id="errorMessage" class="message error-message" style="display: none;"></div>
+
+                <div class="section-title-bar">
+                    <h2>Your Homes & Monitoring Systems</h2>
+                </div>
+
+                <div id="dashboardContent" class="homes-grid">
+                    <!-- Home cards will be dynamically loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- New Alerts Section -->
+        <div id="alertsSection" class="alerts-recommendations-section" style="display: none;">
+            <h3><i class="fa-solid fa-bell-on"></i> Recent Alerts</h3>
+            <div id="alertsList">
+                <!-- Alerts will be dynamically loaded here -->
+                <p class="message no-data-message">No recent alerts to display.</p>
+            </div>
+        </div>
+
+
+        <div id="profileSection" class="alerts-recommendations-section" style="display: none;">
+            <h3><i class="fa-solid fa-bell-on"></i> Profile Details</h3>
+            <div id="profileDetails">
+                <!-- Alerts will be dynamically loaded here -->
+                <p class="message no-data-message">No details to display.</p>
+            </div>
+        </div>
+
+        <!-- New changePasswordSection Section -->
+        <div id="changePasswordSection" class="content-section" style="display: none;">
+            <div class="section-title-bar">
+                <h3><i class="fa-solid fa-key"></i> Change Password</h3>
+            </div>
+            <div id="Changepwd" class="card">
+                <!-- The password change form will be dynamically loaded here -->
+                <p class="message loading-message">Loading password change form...</p>
+            </div>
+        </div>
+
+        <!-- New Recommendations Section -->
+        <div id="recommendationsSection" class="alerts-recommendations-section" style="display: none;">
+            <h3><i class="fa-solid fa-lightbulb"></i> Personalized Recommendations</h3>
+            <div id="recommendationsList">
+                <!-- Recommendations will be dynamically loaded here -->
+                <p class="message no-data-message">No recommendations available at this time.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let overallWaterUsageChart; // Declare chart variable globally for overall usage
+        let homeCharts = {}; // Object to store individual home chart instances, keyed by canvasId
+
+        let currentYear, currentMonth; // To keep track of the displayed month/year
+
+        // Function to handle user logout
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('username');
+            window.location.href = '/login.html'; // Redirect to login page
+        }
+
+        // Function to show a specific section and hide others
+        function showSection(sectionId) {
+            const sections = ['dashboardContentContainer', 'alertsSection', 'recommendationsSection', 'profileSection', 'changePasswordSection'];
+            sections.forEach(id => {
+                const section = document.getElementById(id);
+                if (section) {
+                    section.style.display = (id === sectionId) ? 'block' : 'none';
+                }
+            });
+            // Also close the sidebar on mobile
+            document.getElementById('check').checked = false;
+        }
+
+        // Function to fetch and render the overall water usage chart
+        async function fetchAndRenderOverallWaterUsage(year, month) {
+            const token = localStorage.getItem('token');
+            const errorMessageDiv = document.getElementById('errorMessage');
+
+            if (!token) {
+                // Using a custom modal/message box instead of alert()
+                displayMessage('Authentication token not found. Please log in.', 'error');
+                logout();
+                return;
+            }
+
+            // Update month/year display in the UI
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('currentMonthYear').textContent = `${monthNames[month - 1]} ${year}`;
+
+            try {
+                // Assuming this endpoint provides total usage across all homes
+                const response = await fetch(`/api/user/water-usage/${year}/${month}`, {
+                    headers: {
+                        'x-auth-token': token
+                    }
+                });
+                const data = await response.json();
+                console.log("Overall water usage data:", data);
+
+                if (response.ok) {
+                    const dailyUsage = data.dailyUsage; // Array of daily volumes
+                    const labels = data.labels;         // Array of day numbers
+                    const unit = data.unit || 'liters'; // Unit of measurement
+
+                    // Calculate total monthly usage
+                    const total = dailyUsage.reduce((sum, current) => sum + current, 0);
+                    document.getElementById('totalMonthlyUsage').textContent = `${total.toFixed(2)} ${unit}`;
+
+                    // Render or update Chart.js graph
+                    const ctx = document.getElementById('waterUsageChart').getContext('2d');
+
+                    if (overallWaterUsageChart) {
+                        // Update existing chart data
+                        overallWaterUsageChart.data.labels = labels;
+                        overallWaterUsageChart.data.datasets[0].data = dailyUsage;
+                        overallWaterUsageChart.data.datasets[0].label = `Daily Water Usage (${unit})`;
+                        overallWaterUsageChart.options.scales.y.title.text = `Volume (${unit})`;
+                        overallWaterUsageChart.update();
+                    } else {
+                        // Create new chart instance
+                        overallWaterUsageChart = new Chart(ctx, {
+                            type: 'bar', // Bar chart for daily usage
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: `Daily Water Usage (${unit})`,
+                                    data: dailyUsage,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.6)', // Blue bars
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false, // Allow canvas to resize
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Day of Month'
+                                        }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: `Volume (${unit})`
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) {
+                                                    label += ': ';
+                                                }
+                                                label += context.parsed.y + ' ' + unit;
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    errorMessageDiv.textContent = ''; // Clear any previous error messages
+                    errorMessageDiv.style.display = 'none';
+
+                } else {
+                    displayMessage(data.message || 'Failed to load overall water usage data.', 'error');
+                    if (response.status === 401 || response.status === 403) {
+                        displayMessage('Session expired or unauthorized. Please log in again.', 'error');
+                        logout();
+                    }
+                }
+            } catch (error) {
+                console.error('Network error fetching overall water usage:', error);
+                displayMessage('Could not connect to the server to fetch overall water usage.', 'error');
+            }
+        }
+
+        // Function to fetch and display general dashboard data (homes, controllers, sensors)
+        async function fetchDashboardData() {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                displayMessage('You are not logged in. Redirecting to login page.', 'error');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Show loading message and hide any previous error
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            try {
+                // This endpoint now correctly includes monthlyUsageData for each home
+                const response = await fetch('/api/user/dashboard-data', {
+                    headers: {
+                        'x-auth-token': token
+                    }
+                });
+
+                const data = await response.json();
+                document.getElementById('loading').style.display = 'none'; // Hide loading message
+
+                if (response.ok) {
+                    displayUserData(data); // Render the fetched data
+                } else {
+                    displayMessage(data.message || 'Failed to fetch dashboard data.', 'error');
+                    if (response.status === 401) {
+                        displayMessage('Session expired. Please log in again.', 'error');
+                        logout();
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+                document.getElementById('loading').style.display = 'none';
+                displayMessage('Network error. Could not connect to the server.', 'error');
+            }
+        }
+
+        // Function to display user-specific data (homes, controllers, sensors)
+        function displayUserData(data) {
+            // Display username in the header
+            document.getElementById('usernameDisplay').textContent = `(${data.username || 'User'})`;
+            console.log("Dashboard data:", data);
+
+            const contentDiv = document.getElementById('dashboardContent');
+            contentDiv.innerHTML = ''; // Clear previous content
+            // Destroy all existing home charts before recreating
+            Object.values(homeCharts).forEach(chart => chart.destroy());
+            homeCharts = {}; // Reset home charts instances on new data load
+
+            if (data.homes && data.homes.length > 0) {
+                data.homes.forEach(home => {
+                    const homeCard = document.createElement('div');
+                    homeCard.className = 'home-card';
+
+                    // Generate water tank info and latest level
+                    let waterTanksHtml = 'No water tanks configured.';
+                    if (home.waterTanks && home.waterTanks.length > 0) {
+                        waterTanksHtml = home.waterTanks.map(t => {
+                            // Find the water level sensor reading specific to this tank
+                            const latestLevelReading = t.readings ? t.readings.find(r => r.unit === '%' || r.unit === 'meters' || r.unit === 'feet') : null;
+                            const levelDisplay = latestLevelReading ? `${latestLevelReading.value}${latestLevelReading.unit || ''}` : 'N/A';
+
+                            // Find the water flow sensor reading specific to this tank (if any)
+                            const latestFlowReading = t.readings ? t.readings.find(r => r.unit && (r.unit.includes('liters') || r.unit.includes('gallons'))) : null;
+                            const flowDisplay = latestFlowReading ? `(Flow: ${latestFlowReading.value} ${latestFlowReading.unit})` : '';
+
+                            return `<span class="tank-info"><i class="fa-solid fa-water"></i> ${t.name}: <strong>${levelDisplay}</strong> ${flowDisplay} (${t.capacityLitres}L)</span>`;
+                        }).join('');
+                    }
+
+                    // Determine rain status
+                    let rainStatusHtml = '<span class="rain-status-indicator unknown"><i class="fa-solid fa-cloud"></i> Rain Status: Unknown</span>';
+                    // Use flatMap to get all sensors from all controllers in this home, then find the rain sensor
+                    const rainSensor = home.controllers.flatMap(c => c.sensors).find(s => s.type === 'rain_status');
+                    if (rainSensor && rainSensor.readings && rainSensor.readings.length > 0) {
+                        const isRaining = rainSensor.readings[0].value; // Assuming boolean
+                        const statusClass = isRaining ? 'raining' : 'not-raining';
+                        const statusText = isRaining ? 'Raining' : 'Not Raining';
+                        const statusIcon = isRaining ? 'fa-solid fa-cloud-showers-heavy' : 'fa-solid fa-cloud-sun';
+                        rainStatusHtml = `<span class="rain-status-indicator ${statusClass}"><i class="${statusIcon}"></i> Rain Status: <strong>${statusText}</strong></span>`;
+                    }
+
+                    homeCard.innerHTML = `
+                        <div class="home-summary">
+                            <h3><i class="fa-solid fa-house-chimney"></i> ${home.name} <small>${home.description ? `(${home.description})` : ''}</small></h3>
+                            <div class="home-insights">
+                                <p><strong>Location:</strong> Lat: ${home.location.latitude}, Lng: ${home.location.longitude}</p>
+                                <div class="tank-levels-group">
+                                    <h4>Tank Levels:</h4>
+                                    ${waterTanksHtml}
+                                </div>
+                                <div class="rain-status-group">
+                                    ${rainStatusHtml}
+                                </div>
+                            </div>
+                            
+                            <div class="home-water-usage">
+                                <h4>Water Usage for ${home.name} (Current Month):</h4>
+                                <p>Total: <strong id="home-${home._id}-monthly-usage">--</strong></p>
+                                <canvas id="home-chart-${home._id}" class="home-usage-chart"></canvas>
+                            </div>
+
+                            <button class="btn btn-primary view-details-btn" data-home-id="${home._id}">
+                                View Controllers & Sensors <i class="fa-solid fa-angle-down"></i>
+                            </button>
+                        </div>
+                        <div class="home-details" id="home-details-${home._id}" style="display: none;">
+                        </div>
+                    `;
+                    contentDiv.appendChild(homeCard);
+
+                    // Render per-home water usage chart IF data is available
+                    if (home.monthlyUsageData) {
+                        renderHomeWaterUsageChart(`home-chart-${home._id}`, home.monthlyUsageData);
+                    } else {
+                        document.getElementById(`home-${home._id}-monthly-usage`).textContent = 'N/A';
+                    }
+
+                    // Add event listener to the "View Details" button
+                    const viewDetailsBtn = homeCard.querySelector('.view-details-btn');
+                    viewDetailsBtn.addEventListener('click', () => toggleHomeDetails(home._id, home.controllers));
+                });
+            } else {
+                contentDiv.innerHTML = '<p class="message no-data-message">No water monitoring data found for your account. Please contact support to have homes, controllers, and sensors assigned.</p>';
+            }
+        }
+
+        // Function to render individual home water usage chart
+        function renderHomeWaterUsageChart(canvasId, usageData) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const dailyUsage = usageData.dailyUsage;
+            const labels = usageData.labels;
+            const unit = usageData.unit || 'liters';
+
+            const total = dailyUsage.reduce((sum, current) => sum + current, 0);
+            document.getElementById(canvasId.replace('home-chart-', 'home-') + '-monthly-usage').textContent = `${total.toFixed(2)} ${unit}`;
+
+            if (homeCharts[canvasId]) {
+                homeCharts[canvasId].data.labels = labels;
+                homeCharts[canvasId].data.datasets[0].data = dailyUsage;
+                homeCharts[canvasId].data.datasets[0].label = `Daily Usage (${unit})`;
+                homeCharts[canvasId].options.scales.y.title.text = `Volume (${unit})`;
+                homeCharts[canvasId].update();
+            } else {
+                homeCharts[canvasId] = new Chart(ctx, {
+                    type: 'line', // Line chart for individual homes might be better for trend
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `Daily Usage (${unit})`,
+                            data: dailyUsage,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)', // Different color
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3 // Smooth the line
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { beginAtZero: true, title: { display: true, text: 'Day of Month' } },
+                            y: { beginAtZero: true, title: { display: true, text: `Volume (${unit})` } }
+                        },
+                        plugins: {
+                            tooltip: { callbacks: { label: function (context) { let label = context.dataset.label || ''; if (label) { label += ': '; } label += context.parsed.y + ' ' + unit; return label; } } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Function to toggle home details visibility and render controllers
+        function toggleHomeDetails(homeId, controllers) {
+            const detailsDiv = document.getElementById(`home-details-${homeId}`);
+            const button = document.querySelector(`.view-details-btn[data-home-id="${homeId}"]`);
+
+            if (detailsDiv.style.display === 'none') {
+                detailsDiv.style.display = 'block';
+                button.innerHTML = `Hide Controllers & Sensors <i class="fa-solid fa-angle-up"></i>`;
+                renderControllersAndSensors(detailsDiv, controllers); // Render controllers for this home
+            } else {
+                detailsDiv.style.display = 'none';
+                button.innerHTML = `View Controllers & Sensors <i class="fa-solid fa-angle-down"></i>`;
+            }
+        }
+
+        // Function to render controllers and sensors within a home's details div
+        function renderControllersAndSensors(parentDiv, controllers) {
+            parentDiv.innerHTML = ''; // Clear any previous content
+
+            if (controllers && controllers.length > 0) {
+                controllers.forEach(controller => {
+                    const controllerCard = document.createElement('div');
+                    controllerCard.className = 'controller-card';
+
+                    // Determine controller status class for styling
+                    let controllerStatusClass = '';
+                    if (controller.status === 'online') controllerStatusClass = 'status-online';
+                    else if (controller.status === 'offline') controllerStatusClass = 'status-offline';
+                    else if (controller.status === 'alert') controllerStatusClass = 'status-alert';
+
+                    controllerCard.innerHTML = `
+                        <div class="controller-summary ${controllerStatusClass}">
+                            <h4><i class="fa-solid fa-microchip"></i> Controller: ${controller.name} <span class="controller-status">(${controller.status})</span></h4>
+                            <p><strong>Hardware ID:</strong> ${controller.controllerHardwareId}</p>
+                            <p><strong>Firmware:</strong> ${controller.firmwareVersion || 'N/A'}</p>
+                            <p><strong>Last Heartbeat:</strong> ${controller.lastHeartbeat ? new Date(controller.lastHeartbeat).toLocaleString() : 'N/A'}</p>
+                            <button class="btn btn-tertiary view-sensors-btn" data-controller-id="${controller._id}">
+                                View Sensor Details <i class="fa-solid fa-angle-down"></i>
+                            </button>
+                        </div>
+                        <div class="sensor-details" id="sensors-details-${controller._id}" style="display: none;">
+                            <div class="sensor-data-grid">
+                            </div>
+                        </div>
+                    `;
+                    parentDiv.appendChild(controllerCard);
+
+                    // Add event listener to the "View Sensors" button
+                    const viewSensorsBtn = controllerCard.querySelector('.view-sensors-btn');
+                    viewSensorsBtn.addEventListener('click', () => toggleSensorDetails(controller._id, controller.sensors));
+                });
+            } else {
+                parentDiv.innerHTML = `<p class="message no-data-message">No controllers found for this home.</p>`;
+            }
+        }
+
+        // Function to toggle sensor details visibility and render individual sensors
+        function toggleSensorDetails(controllerId, sensors) {
+            const sensorsDetailsDiv = document.getElementById(`sensors-details-${controllerId}`);
+            const button = document.querySelector(`.view-sensors-btn[data-controller-id="${controllerId}"]`);
+            const sensorsGrid = sensorsDetailsDiv.querySelector('.sensor-data-grid');
+
+            if (sensorsDetailsDiv.style.display === 'none') {
+                sensorsDetailsDiv.style.display = 'block';
+                button.innerHTML = `Hide Sensor Details <i class="fa-solid fa-angle-up"></i>`;
+                renderSensors(sensorsGrid, sensors); // Render sensors for this controller
+            } else {
+                sensorsDetailsDiv.style.display = 'none';
+                button.innerHTML = `View Sensor Details <i class="fa-solid fa-angle-down"></i>`;
+            }
+        }
+
+        // Function to render individual sensors within the sensor grid
+        function renderSensors(sensorsGrid, sensors) {
+            sensorsGrid.innerHTML = ''; // Clear existing sensors
+
+            if (sensors && sensors.length > 0) {
+                sensors.forEach(sensor => {
+                    const sensorDiv = document.createElement('div');
+                    let sensorTypeClass = '';
+                    let sensorIcon = 'fa-solid fa-gauge-high'; // Default icon
+
+                    // Assign CSS class and icon based on sensor type
+                    if (sensor.type === 'water_level') {
+                        sensorTypeClass = 'level';
+                        sensorIcon = 'fa-solid fa-droplet';
+                    } else if (sensor.type === 'water_flow') {
+                        sensorTypeClass = 'flow';
+                        sensorIcon = 'fa-solid fa-faucet-drip';
+                    } else if (sensor.type === 'temperature') {
+                        sensorTypeClass = 'temp';
+                        sensorIcon = 'fa-solid fa-temperature-three-quarters';
+                    } else if (sensor.type === 'rain_status') {
+                        sensorTypeClass = 'rain';
+                        sensorIcon = 'fa-solid fa-cloud-rain';
+                    } else if (sensor.type === 'humidity') {
+                        sensorTypeClass = 'humidity';
+                        sensorIcon = 'fa-solid fa-cloud';
+                    }
+
+                    sensorDiv.className = `sensor-data ${sensorTypeClass}`;
+
+                    let latestValueHtml = '<p>No recent readings.</p>';
+                    if (sensor.readings && sensor.readings.length > 0) {
+                        const latestReading = sensor.readings[0];
+                        // Handle boolean values for rain_status specifically
+                        const displayValue = (typeof latestReading.value === 'boolean') ? (latestReading.value ? 'Yes' : 'No') : latestReading.value;
+                        const displayUnit = latestReading.unit || '';
+                        const displayStatus = latestReading.status ? ` (Status: ${latestReading.status})` : '';
+
+                        latestValueHtml = `
+                            <p><strong>Latest:</strong> ${displayValue} ${displayUnit} ${displayStatus}</p>
+                            <p><strong>Pin:</strong> ${sensor.pin || 'N/A'}</p>
+                            <p class="timestamp-small">Last update: ${latestReading.timestamp ? new Date(latestReading.timestamp).toLocaleTimeString() : 'N/A'}</p>
+                        `;
+                    }
+
+                    sensorDiv.innerHTML = `
+                        <strong><i class="${sensorIcon}"></i> ${sensor.name}</strong>
+                        <p class="sensor-type-label">Type: ${sensor.type.replace(/_/g, ' ')}</p>
+                        <p><strong>Model:</strong> ${sensor.model || 'N/A'}</p>
+                        ${latestValueHtml}
+                    `;
+                    sensorsGrid.appendChild(sensorDiv);
+                });
+            } else {
+                sensorsGrid.innerHTML = `<p class="message no-data-message" style="grid-column: 1 / -1;">No sensors found for this controller.</p>`;
+            }
+        }
+
+   
+        function displayMessage(message, type = 'info') {
+            const container = document.getElementById('errorMessage'); // Re-using error message div for general messages
+            container.textContent = message;
+            container.className = `message ${type}-message`; // Add type class for styling
+            container.style.display = 'block';
+            setTimeout(() => {
+                container.style.display = 'none';
+            }, 5000); // Hide after 5 seconds
+        }
+
+        async function fetchAndRenderAlerts() {
+            const token = localStorage.getItem('token');
+            const alertsListDiv = document.getElementById('alertsList');
+            alertsListDiv.innerHTML = '<p class="message loading">Loading alerts...</p>';
+
+            if (!token) {
+                alertsListDiv.innerHTML = '<p class="message error-message">Authentication required to view alerts.</p>';
+                return;
+            }
+
+            try {
+            
+                const response = await fetch('/api/user/alerts', {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+                console.log("Alerts data:", data);
+
+                if (response.ok) {
+                    renderAlerts(data.alerts);
+                } else {
+                    alertsListDiv.innerHTML = `<p class="message error-message">${data.message || 'Failed to fetch alerts.'}</p>`;
+                    if (response.status === 401) logout();
+                }
+            } catch (error) {
+                console.error('Error fetching alerts:', error);
+                alertsListDiv.innerHTML = '<p class="message error-message">Network error: Could not load alerts.</p>';
+            }
+        }
+
+        function renderAlerts(alerts) {
+            const alertsListDiv = document.getElementById('alertsList');
+            alertsListDiv.innerHTML = ''; // Clear existing alerts
+            console.log(alerts);
+            if (alerts && alerts.length > 0) {
+                alerts.forEach(alert => {
+                    const alertDiv = document.createElement('div');
+
+                    // Add class based on severity for styling
+                    let severityClass = '';
+                    let icon = 'fa-solid fa-bell';
+                    if (alert.severity === 'critical') {
+                        severityClass = 'critical';
+                        icon = 'fa-solid fa-triangle-exclamation';
+                    } else if (alert.severity === 'warning') {
+                        severityClass = 'warning';
+                        icon = 'fa-solid fa-circle-exclamation';
+                    } else { // info or general
+                        severityClass = 'info';
+                        icon = 'fa-solid fa-circle-info';
+                    }
+
+                    alertDiv.className = `alert-item ${severityClass}`;
+                    alertDiv.innerHTML = `
+                        <i class="${icon}"></i>
+                        <div class="alert-content">
+                            <h4>${alert.type}</h4>
+                            <p>${alert.message}</p>
+                            <p class="timestamp-small">Triggered: ${new Date(alert.timestamp).toLocaleString()}</p>
+                            ${alert.homeName ? `<p class="timestamp-small">Home: ${alert.homeName}</p>` : ''}
+                        </div>
+                    `;
+                    alertsListDiv.appendChild(alertDiv);
+                });
+            } else {
+                alertsListDiv.innerHTML = '<p class="message no-data-message">No recent alerts to display.</p>';
+            }
+        }
+
+        async function fetchAndRenderRecommendations() {
+            const token = localStorage.getItem('token');
+            const recommendationsListDiv = document.getElementById('recommendationsList');
+            recommendationsListDiv.innerHTML = '<p class="message loading">Generating recommendations...</p>';
+
+            if (!token) {
+                recommendationsListDiv.innerHTML = '<p class="message error-message">Authentication required to view recommendations.</p>';
+                return;
+            }
+
+            try {
+                
+                const response = await fetch('/api/user/recommendations', {
+                    headers: { 'x-auth-token': token }
+                });
+                const data = await response.json();
+                // console.log("Recommendations data:", data);
+
+                if (response.ok) {
+                    renderRecommendations(data.recommendations);
+                } else {
+                    recommendationsListDiv.innerHTML = `<p class="message error-message">${data.message || 'Failed to fetch recommendations.'}</p>`;
+                    if (response.status === 401) logout();
+                }
+            } catch (error) {
+                console.error('Error fetching recommendations:', error);
+                recommendationsListDiv.innerHTML = '<p class="message error-message">Network error: Could not load recommendations.</p>';
+            }
+        }
+
+        function renderRecommendations(recommendations) {
+            const recommendationsListDiv = document.getElementById('recommendationsList');
+            recommendationsListDiv.innerHTML = ''; // Clear existing recommendations
+
+            if (recommendations && recommendations.length > 0) {
+                recommendations.forEach(rec => {
+                    const recDiv = document.createElement('div');
+                    recDiv.className = 'recommendation-item';
+                    recDiv.innerHTML = `
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <div class="recommendation-content">
+                            <h4>${rec.title}</h4>
+                            <p>${rec.message}</p>
+                            ${rec.impact ? `<p><strong>Impact:</strong> ${rec.impact}</p>` : ''}
+                            ${rec.homeName ? `<p class="timestamp-small">Applicable to: ${rec.homeName}</p>` : ''}
+                        </div>
+                    `;
+                    recommendationsListDiv.appendChild(recDiv);
+                });
+            } else {
+                recommendationsListDiv.innerHTML = '<p class="message no-data-message">No recommendations available at this time.</p>';
+            }
+        }
+
+
+
+
+        async function fetchAndRenderProfile() {
+            const profileContentDiv = document.getElementById('profileDetails');
+
+            try {
+            
+                const token = localStorage.getItem('token');
+
+                if (!token) {
+                    profileContentDiv.innerHTML = '<p class="error-message">Error: No authentication token found. Please log in.</p>';
+                    return;
+                }
+
+                const response = await fetch('/api/user/profile', {
+                    method: 'GET',
+                    headers: {
+                        'x-auth-token': token
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to fetch profile data');
+                }
+
+                const data = await response.json();
+                let html = `
+                    <div class="user-info">
+                        <h2>User Information</h2>
+                        <p><strong>Name:</strong> ${data.user.firstname} ${data.user.lastname} </p>
+
+                        <p><strong>Username:</strong> ${data.user.username}</p>
+                        <p><strong>Email:</strong> ${data.user.email}</p>
+
+                    </div>
+                `;
+
+                if (data.homes && data.homes.length > 0) {
+                    html += `<div class="home-list"><h2>Your Homes</h2>`;
+                    data.homes.forEach(home => {
+                        html += `
+                            <div class="home-item">
+                                <h3>${home.name}</h3>
+                                <p><strong>Controllers:</strong> ${home.controllerCount}</p>
+                                <p><strong>Sensors:</strong> ${home.sensorCount}</p>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                } else {
+                    html += `<p>No homes associated with your account.</p>`;
+                }
+
+                profileContentDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                profileContentDiv.innerHTML = `<p class="error-message">Error: ${error.message || 'Could not load profile data.'}</p>`;
+            }
+        }
+
+
+
+async function fetchAndRenderChangePasswordForm() {
+    const changePwdDiv = document.getElementById('Changepwd');
+    // Display loading message immediately, and ensure it's removed when done
+    changePwdDiv.innerHTML = '<p class="message loading-message">Loading password change form...</p>';
+
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('userRole');
+
+    if (!token || (userRole !== 'user' && userRole !== 'admin')) {
+        changePwdDiv.innerHTML = '<p class="message error-message">Unauthorized: Please log in to change your password.</p>';
+        setTimeout(logout, 2000); // Redirect after a short delay
+        return;
+    }
+
+    // HTML content for the password change form
+    // The 'message' div inside the form has a unique ID for this instance
+    const formHtml = `
+        <form id="dynamicChangePasswordForm">
+            <div class="form-group">
+                <label for="oldPassword">Old Password:</label>
+                <input type="password" id="oldPassword" name="oldPassword" required>
+            </div>
+
+            <div class="form-group">
+                <label for="newPassword">New Password:</label>
+                <input type="password" id="newPassword" name="newPassword" required>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmNewPassword">Confirm New Password:</label>
+                <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fa-solid fa-key"></i> Change Password
+            </button>
+            <div id="changePasswordMessage" class="message"></div> <!-- Unique ID for messages related to this form -->
+        </form>
+    `;
+
+    // 1. Inject the form HTML into the DOM
+    changePwdDiv.innerHTML = formHtml;
+
+    // 2. NOW get the references to the elements INSIDE the newly injected HTML
+    const dynamicChangePasswordForm = document.getElementById('dynamicChangePasswordForm');
+    const msgDiv = document.getElementById('changePasswordMessage'); 
+
+    // Add a basic check in case an element isn't found (though unlikely if HTML is correct)
+    if (!dynamicChangePasswordForm || !msgDiv) {
+        changePwdDiv.innerHTML = '<p class="message error-message">Error: Could not render password change form components.</p>';
+        console.error("Failed to find dynamic form elements after injection.");
+        return;
+    }
+
+    // 3. Attach the event listener to the newly referenced form
+    dynamicChangePasswordForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        msgDiv.textContent = ''; // Clear previous messages
+        msgDiv.className = 'message'; // Reset class (to ensure 'display: none' is reset)
+
+        const oldPassword = document.getElementById('oldPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+        if (newPassword !== confirmNewPassword) {
+            msgDiv.textContent = 'New password and confirm new password do not match.';
+            msgDiv.classList.add('error');
+            msgDiv.style.display = 'block'; // Make message visible
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            msgDiv.textContent = 'New password must be at least 6 characters long.';
+            msgDiv.classList.add('error');
+            msgDiv.style.display = 'block'; // Make message visible
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/user/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token // Use the token from local storage
+                },
+                body: JSON.stringify({ oldPassword, newPassword, confirmNewPassword })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                msgDiv.textContent = data.message;
+                msgDiv.classList.add('success');
+                // Clear the form fields after successful change
+                dynamicChangePasswordForm.reset();
+            } else {
+                msgDiv.textContent = data.message || 'Failed to change password.';
+                msgDiv.classList.add('error');
+                if (response.status === 401 || response.status === 403) {
+                    msgDiv.textContent += ' Redirecting to login.';
+                    setTimeout(logout, 2000); 
+                }
+            }
+            msgDiv.style.display = 'block'; // Make message visible after fetch attempt
+        } catch (error) {
+            console.error('Network error:', error);
+            msgDiv.textContent = 'Could not connect to the server.';
+            msgDiv.classList.add('error');
+            msgDiv.style.display = 'block'; // Make message visible
+        }
+    });
+}
+
+
+
+
+
+        // Consolidated DOMContentLoaded listener to initialize the dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            const userRole = localStorage.getItem('userRole');
+            if (userRole !== 'user') {
+                displayMessage('Unauthorized access. Redirecting to login.', 'error');
+                logout();
+                return;
+            }
+
+            const today = new Date();
+            currentYear = today.getFullYear();
+            currentMonth = today.getMonth() + 1; 
+
+            await fetchDashboardData();
+            await fetchAndRenderOverallWaterUsage(currentYear, currentMonth); 
+            await fetchAndRenderAlerts(); 
+            await fetchAndRenderRecommendations(); 
+            await fetchAndRenderProfile();
+            await fetchAndRenderChangePasswordForm();
+            showSection('dashboardContentContainer');
+
+            document.getElementById('prevMonthBtn').addEventListener('click', async () => {
+                currentMonth--;
+                if (currentMonth < 1) {
+                    currentMonth = 12;
+                    currentYear--;
+                }
+                await fetchAndRenderOverallWaterUsage(currentYear, currentMonth);
+                
+            });
+
+            document.getElementById('nextMonthBtn').addEventListener('click', async () => {
+                const today = new Date();
+                const currentDisplayedDate = new Date(currentYear, currentMonth - 1, 1);
+
+                if (currentDisplayedDate.getFullYear() >= today.getFullYear() && currentDisplayedDate.getMonth() >= today.getMonth()) {
+                    return; 
+                }
+
+                currentMonth++;
+                if (currentMonth > 12) {
+                    currentMonth = 1;
+                    currentYear++;
+                }
+                await fetchAndRenderOverallWaterUsage(currentYear, currentMonth);
+            });
+
+
+        });
+    </script>
+</body>
+
+</html>
+
