@@ -175,8 +175,7 @@ router.get('/users/:userId', authMiddleware, adminAuth, async (req, res) => {
 
 
 router.post('/homes/add', authMiddleware, adminAuth, async (req, res) => {
-  const { userId, name, description, latitude, longitude, tankName, tankCapacityLitres } = req.body;
-  console.log(userId)
+  const { userId, name, description, latitude, longitude, waterTanks } = req.body;
 
   if (!userId || !name || !latitude || !longitude) {
     return res.status(400).json({ message: 'User ID, home name, latitude, and longitude are required.' });
@@ -199,12 +198,12 @@ router.post('/homes/add', authMiddleware, adminAuth, async (req, res) => {
       waterTanks: [] // Start with an empty array
     });
 
-    // Add tank details if provided
-    if (tankName && tankCapacityLitres) {
+   // Add tank details if provided
+    if (waterTanks[0].name && waterTanks[0].capacityLitres) {
       newHome.waterTanks.push({
-        tankId: tankName, // Generate a unique ID for the tank
-        name: tankName,
-        capacityLitres: parseInt(tankCapacityLitres, 10)
+        tankId: waterTanks[0].name, // Generate a unique ID for the tank
+        name: waterTanks[0].name,
+        capacityLitres: waterTanks[0].capacityLitres
       });
     }
 
