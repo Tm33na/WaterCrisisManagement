@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Management System - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300,400,500,700&family=Montserrat:wght@400,600,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c7da0; /* A deeper, professional blue for water */
+            --primary-hover-color: #1a5676;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --background-start: #e0f2f7; /* Lighter blue/cyan for background top */
+            --background-end: #c4e4ed;   /* Slightly darker blue/cyan for background bottom */
+            --card-background: #ffffff;
+            --text-color: #34495e;
+            --label-color: #7f8c8d;
+            --border-color: #c9d8e0; /* Softer border */
+            --input-focus-border: #2c7da0;
+            --box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* More pronounced, softer shadow */
+            --border-radius: 12px; /* Even more rounded for a modern feel */
+            --font-main: 'Roboto', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden; /* Ensure no scrollbars */
+        }
+
+        .login-container {
+            background-color: var(--card-background);
+            padding: 45px; /* More generous padding */
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 450px; /* Slightly wider for a more substantial look */
+            text-align: center;
+            box-sizing: border-box;
+            /* No z-index needed without animated background elements */
+        }
+
+        .login-container h2 {
+            font-family: var(--font-heading);
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 2.8em; /* Even larger, more dominant heading */
+            letter-spacing: -0.8px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* Subtle text shadow */
+        }
+
+        .tagline {
+            font-size: 1.15em;
+            color: var(--label-color);
+            margin-bottom: 40px; /* More space below tagline */
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--label-color);
+            font-weight: 500;
+            font-size: 0.95em;
+            letter-spacing: 0.2px;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 16px 20px; /* More padding for inputs */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            color: var(--text-color);
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 0.3rem rgba(44, 125, 160, 0.25); /* Focus glow from primary color */
+        }
+
+        .btn-login {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 18px 25px; /* Larger button */
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.25em; /* Larger button font */
+            font-weight: 600;
+            width: 100%;
+            margin-top: 30px; /* More top margin */
+            transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); /* Stronger shadow on hover */
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .message {
+            margin-top: 30px;
+            padding: 15px; /* More padding for messages */
+            border-radius: var(--border-radius);
+            font-size: 1em;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.5s ease; /* Slower, smoother transition */
+            border-width: 1px;
+            border-style: solid;
+        }
+        .message.show {
+            opacity: 1;
+        }
+        .message.error {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+            border-color: var(--error-color);
+        }
+        .message.success {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border-color: var(--success-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 500px) {
+            .login-container {
+                margin: 20px;
+                padding: 35px 25px;
+            }
+            .login-container h2 {
+                font-size: 2.4em;
+            }
+            .tagline {
+                font-size: 1.05em;
+            }
+            .btn-login {
+                font-size: 1.15em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Water Management System</h2>
+        <p class="tagline">Empowering sustainable water usage for a better future.</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn-login">Login Securely</button>
+            <div id="message" class="message"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+
+            messageDiv.textContent = ''; // Clear previous messages
+            messageDiv.className = 'message'; // Reset message class for dynamic class addition
+
+            function showMessage(text, type) {
+                messageDiv.textContent = text;
+                messageDiv.classList.add(type);
+                messageDiv.classList.add('show');
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message || 'Login successful! Redirecting...', 'success');
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userRole', data.role);
+
+                    setTimeout(() => {
+                        if (data.role === 'admin') {
+                            window.location.href = '/admin-dashboard.html';
+                        } else {
+                            window.location.href = '/user-dashboard.html';
+                        }
+                    }, 1200); // Allow message to be seen
+                } else {
+                    showMessage(data.message || 'Login failed. Please check your email and password.', 'error');
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+                showMessage('Connection error. Please try again later.', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
