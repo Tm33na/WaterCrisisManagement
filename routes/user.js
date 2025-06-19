@@ -279,6 +279,12 @@ const currentMonth = nowIST.getMonth() + 1; // Months are 0-indexed in JS
             home.controllers = [];
 
             for (const controller of controllers) {
+
+                if (controller.lastHeartbeat) {
+                    controller.lastHeartbeat = new Date(controller.lastHeartbeat).toLocaleString('en-US', { timeZone: IST_TIMEZONE });
+                } else {
+                    controller.lastHeartbeat = 'N/A';
+                }
                 // 2. Fetch sensors and their recent readings
                 const sensors = await Sensor.find({ controllerId: controller._id }).lean();
 
