@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="./css/admin_dashboard_style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script> async function checkAdminStatus() {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('userRole');
+
+            if (!token || userRole !== 'admin') {
+                alert('Unauthorized access. Redirecting to login.');
+                window.location.href = '/login.html';
+                return false;
+            }
+            return true;
+        }
+        const isAuthorized = await checkAdminStatus();
+        if (!isAuthorized) return;</script>
+
+</head>
+
+<html>
+
+<body>
+
+    <input type="checkbox" id="check" />
+
+    <div class="nav">
+        <div class="btn1">
+            <label for="check"><i class="fa-solid fa-bars"></i></label>
+            <h1 style="display: inline-block;">Admin Dashboard</h1>
+        </div>
+        <div class="logout-div">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <div><a href="#" class="btn-action" onclick="showSection('dashboardContentContainer')"><i
+                    class="fa-solid fa-house sidebar-icon"></i> Dashboard</a></div>
+        <div><a href="#" class="btn-action" onclick="showSection('profileSection')"><i
+                    class="fa-solid fa-user-gear sidebar-icon"></i> Profile</a> </div>
+        <div><a href="#" class="btn-action" onclick="showSection('changePasswordSection')"><i
+                    class="fa-solid fa-key sidebar-icon"></i> Change Password</a> </div>
+        <div><a href="#" class="btn-action" onclick="showSection('userListSection')"><i
+                    class="fa-solid fa-users sidebar-icon"></i> User List </a></div>
+        <div><a href="#" class="btn-action" onclick="showSection('registerUserSection')"><i
+                    class="fa-solid fa-user-plus sidebar-icon"></i> Register New User </a></div>
+
+        <div><a href="#" class="btn-action" onclick="showSection('addHomeSection')"><i
+                    class="fa-solid fa-house sidebar-icon"></i> Add New Home</a> </div>
+        <div><a href="#" class="btn-action" onclick="showSection('addControllerSection')"><i
+                    class="fa-solid fa-microchip sidebar-icon"></i> Add New Controller</a> </div>
+        <div><a href="#" class="btn-action" onclick="showSection('addSensorSection')"><i
+                    class="fa-solid fa-gauge-high sidebar-icon"></i> Add New Sensor</a> </div>
+
+
+        <div><a class="btn-action" href="#" onclick="logout()"><i
+                    class="fa-solid fa-right-from-bracket sidebar-icon"></i> Logout</a></div>
+    </div>
+
+
+
+    <div class="main">
+
+
+        <div id="dashboardContentContainer">
+            <div class="dashboard-container">
+
+                <h2 class="main-heading">System Overview</h2>
+                <div id="loadingStats" class="message loading">Loading statistics...</div>
+                <div id="errorMessageStats" class="message error-message" style="display: none;"></div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="card-icon blue"><i class="fa-solid fa-users"></i></div>
+                        <div class="card-content">
+                            <h3>Total Users</h3>
+                            <p id="totalUsers"></p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="card-icon green"><i class="fa-solid fa-house"></i></div>
+                        <div class="card-content">
+                            <h3>Total Homes</h3>
+                            <p id="totalHomes"></p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="card-icon orange"><i class="fa-solid fa-microchip"></i></div>
+                        <div class="card-content">
+                            <h3>Total Controllers</h3>
+                            <p id="totalControllers"></p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="card-icon purple"><i class="fa-solid fa-gauge-high"></i></div>
+                        <div class="card-content">
+                            <h3>Total Sensors</h3>
+                            <p id="totalSensors"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3 class="quick-actions-heading">Quick Actions</h3>
+                    <a href="#" class="btn-primary" onclick="showSection('registerUserSection')"><i class="fa-solid fa-user-plus btn-icon"></i>
+                        Register New User</a>
+                    <a href="#" class="btn-primary" onclick="showSection('addHomeSection')"><i
+                            class="fa-solid fa-house-chimney-medical btn-icon"></i> Add New Home</a>
+                    <a href="#" class="btn-primary" onclick="showSection('addControllerSection')"><i class="fa-solid fa-microchip btn-icon"></i>
+                        Add New Controller</a>
+                    <a href="#" class="btn-primary" onclick="showSection('addSensorSection')"><i class="fa-solid fa-plus btn-icon"></i> Add New
+                        Sensor</a>
+                    <a href="#" class="btn-primary" onclick="showSection('userListSection')"><i class="fa-solid fa-users-viewfinder btn-icon"></i>
+                        View All Users</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="userListSection" class="alerts-recommendations-section" style="display: none;">
+            <h3><i class="fa-solid fa-bell-on"></i> Recent Alerts</h3>
+            <div id="usersList">
+                <p class="message no-data-message">No recent alerts to display.</p>
+            </div>
+        </div>
+
+        <div id="userModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 id="modalUserName"></h2>
+                <div id="loadingModal" class="message loading" style="display: none;">Loading details...</div>
+                <div id="modalErrorMessage" class="message error-message" style="display: none;"></div>
+                <div id="modalBodyContent" class="modal-body-content">
+                </div>
+            </div>
+        </div>
+
+        <div id="profileSection" class="alerts-recommendations-section" style="display: none;">
+            <h3><i class="fa-solid fa-bell-on"></i> Profile Details</h3>
+            <div id="profileDetails">
+                <!-- Profile will be dynamically loaded here -->
+                <p class="message no-data-message">No details to display.</p>
+            </div>
+        </div>
+
+        <!-- New changePasswordSection Section -->
+        <div id="changePasswordSection" class="content-section" style="display: none;">
+            <div class="section-title-bar">
+                <h3><i class="fa-solid fa-key"></i> Change Password</h3>
+            </div>
+            <div id="Changepwd" class="card">
+                <!-- The password change form will be dynamically loaded here -->
+                <p class="message loading-message">Loading password change form...</p>
+            </div>
+        </div>
+        <!-- New registerUserSection Section -->
+
+        <div id="registerUserSection" class="dashboard-section" style="display: none;">
+            <h3><i class="fa-solid fa-user-plus"></i> Register New User</h3>
+            <div id="userRegisterFormContainer">
+                <p class="message loading-message">Loading user registration form...</p>
+            </div>
+        </div>
+
+
+        <!-- New addHomeSection Section -->
+     <div id="addHomeSection" class="dashboard-section" style="display: none;">
+    <h3><i class="fa-solid fa-house-chimney-medical"></i> Add New Home</h3>
+    <div id="addHomeFormContainer">
+        <p class="message loading-message">Loading Add Home form...</p>
+    </div>
+</div>
+
+
+        <!-- New addControllerSection Section -->
+        <div id="addControllerSection" class="dashboard-section" style="display: none;">
+            <h3><i class="fa-solid fa-microchip"></i> Add New Controller</h3>
+            <div id="addControllerFormContainer">
+                <p class="message loading-message">Loading Add Controller form...</p>
+            </div>
+        </div>
+
+        <!-- New addSensorSection Section -->
+     <div id="addSensorSection" class="dashboard-section" style="display: none;">
+    <h3><i class="fa-solid fa-sensor"></i> Add New Sensor</h3>
+    <div id="addSensorFormContainer">
+        <p class="message loading-message">Loading Add Sensor form...</p>
+    </div>
+</div>
+
+
+    </div>
+
+
+
+</body>
+<script src="./js/admin_dashboard_script.js"></script>
+<script>
+
+
+</script>
+
+</html>
