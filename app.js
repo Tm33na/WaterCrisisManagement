@@ -18,6 +18,8 @@ const MONGODB_URI = process.env.MONGODB_URI;
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // --- MongoDB Connection ---
 mongoose.connect(MONGODB_URI,{ dbName: 'water_monitoring_db' })
@@ -49,7 +51,10 @@ app.use('/api/sensor-data',sensorDataRoutes);
 app.use('/api/controllers', controllerRoutes);
 
 // --- Protected API Routes for Dashboards ---
-
+// --- Serve HTML Pages ---
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
 // User Dashboard Data Route (Regular User)
 // This route will be hit by the 'user-dashboard.html' to fetch THEIR specific data
 app.get('/api/user/dashboard-data', authMiddleware, async (req, res) => {
