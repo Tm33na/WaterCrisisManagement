@@ -20,7 +20,7 @@ app.use(express.json());
 
 
 // --- MongoDB Connection ---
-mongoose.connect(MONGODB_URI)
+mongoose.connect(MONGODB_URI,{ dbName: 'water_monitoring_db' })
   .then(() => {
     console.log('MongoDB connected successfully.');
            console.log('Server started. Running initial daily water usage calculation for current day...');
