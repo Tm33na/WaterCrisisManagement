@@ -12,7 +12,7 @@ const { User, Home, Controller, Sensor,DailyWaterUsage, SensorReading,HourlyWate
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://tm33na:tmeena@cluster0.8pntt.mongodb.net/';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // --- Middleware ---
 app.use(cors());
