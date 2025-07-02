@@ -8,10 +8,11 @@ const DailyWaterUsage = require('../models/DailyWaterUsage');
 const HourlyWaterUsage = require('../models/HourlyWaterUsage');
 const SensorReading = require('../models/SensorReading');
 const Alert = require('../models/Alert');
-const Recommendation = require('../models/Recommendation'); // Our new Recommendation model
+const Recommendation = require('../models/Recommendation');
+require('dotenv').config();
 
-// Gemini API Configuration (leave apiKey blank, Canvas will inject)
-const GEMINI_API_KEY = "AIzaSyA96SG1CcRPhjriROnFeHpZy7CDhGA3XTU"; // Canvas will inject API key
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
@@ -200,7 +201,7 @@ const startRecommendationCron = () => {
                     await Recommendation.create({
                         userId: home.userId._id,
                         homeId: home._id,
-                        type: 'daily_conservation_tip', // Default type, can be refined based on content
+                        type: 'daily_conservation_tip',
                         content: recommendationContent,
                         contextData: {
                             dailyUsageSummary: context.dailyUsage.map(u => ({ date: u.date.toISOString().split('T')[0], vol: u.totalVolumeUsed })),
