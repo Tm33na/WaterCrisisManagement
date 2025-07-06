@@ -813,14 +813,11 @@ async function renderAddHomeSection() {
                 </div>
 
                 <div class="form-group">
-                    <label for="latitude">Latitude:</label>
-                    <input type="number" id="latitude" name="latitude" step="any" required>
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location"  required>
                 </div>
 
-                <div class="form-group">
-                    <label for="longitude">Longitude:</label>
-                    <input type="number" id="longitude" name="longitude" step="any" required>
-                </div>
+
 
                 <h3>Initial Water Tank (Optional)</h3>
                 <div class="form-group">
@@ -917,8 +914,7 @@ function attachAddHomeFormListener() {
             userId: document.getElementById('userId').value,
             name: document.getElementById('homeName').value,
             description: document.getElementById('description').value,
-            latitude: parseFloat(document.getElementById('latitude').value),
-            longitude: parseFloat(document.getElementById('longitude').value)
+            latitude: document.getElementById('location').value,
             
         };
 
@@ -940,8 +936,8 @@ function attachAddHomeFormListener() {
 
 
         // Basic validation for required fields
-        if (!formData.userId || !formData.name || isNaN(formData.latitude) || isNaN(formData.longitude)) {
-            messageDiv.textContent = 'Please fill in all required home details: User, Home Name, Latitude, and Longitude.';
+        if (!formData.userId || !formData.name || !formData.location ) {
+            messageDiv.textContent = 'Please fill in all required home details: User, Home Name, Location.';
             messageDiv.classList.add('error-message');
             return;
         }
