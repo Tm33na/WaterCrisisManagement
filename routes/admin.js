@@ -175,9 +175,9 @@ router.get('/users/:userId', authMiddleware, adminAuth, async (req, res) => {
 
 
 router.post('/homes/add', authMiddleware, adminAuth, async (req, res) => {
-  const { userId, name, description, latitude, longitude, waterTanks } = req.body;
+  const { userId, name, description, location, waterTanks } = req.body;
 
-  if (!userId || !name || !latitude || !longitude) {
+  if (!userId || !name || !location ) {
     return res.status(400).json({ message: 'User ID, home name, latitude, and longitude are required.' });
   }
 
@@ -191,10 +191,7 @@ router.post('/homes/add', authMiddleware, adminAuth, async (req, res) => {
       userId: userId,
       name: name,
       description: description,
-      location: {
-        latitude: parseFloat(latitude), // Ensure numbers
-        longitude: parseFloat(longitude)
-      },
+      location: location,
       waterTanks: [] // Start with an empty array
     });
 
