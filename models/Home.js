@@ -14,8 +14,7 @@ const HomeSchema = new mongoose.Schema({
     type: String
   },
   location: {
-    latitude: Number,
-    longitude: Number
+    type:String
   },
   waterTanks: [{
     tankId: { type: String, required: true }, // Unique within THIS home
